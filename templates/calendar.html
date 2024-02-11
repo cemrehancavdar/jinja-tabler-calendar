@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css"
+    />
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--tblr-border-color);
+      }
+
+      td {
+        max-height: 100px;
+      }
+
+      .day-header {
+        text-align: center;
+        padding: 10px;
+        width: 14.286%;
+      }
+
+      .week {
+        height: 100px;
+      }
+
+      .day {
+        position: relative;
+        height: 100px;
+      }
+
+      .day-number {
+        position: absolute;
+        top: 2px;
+        right: 16px;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      .other-month {
+        color: #ccc;
+      }
+
+      .ribbon {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      .w-100 {
+        width: 100%;
+      }
+      .br-4 {
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="container" style="padding-block: 4rem">
+        <div></div>
+        <table>
+          <tr>
+            <th class="day-header"><h3>Pazartesi</h3></th>
+            <th class="day-header"><h3>Salı</h3></th>
+            <th class="day-header"><h3>Çarşamba</h3></th>
+            <th class="day-header"><h3>Perşembe</h3></th>
+            <th class="day-header"><h3>Cuma</h3></th>
+            <th class="day-header"><h3>Cumartesi</h3></th>
+            <th class="day-header"><h3>Pazar</h3></th>
+          </tr>
+
+          {% for chunk in calendar|batch(7, "-") %}
+          <tr>
+            {% for day in chunk %}
+            <td
+              class="day  {{ 'other-month' if not is_in_year_and_month(day, year, month + 1) else '' }}"
+            >
+              <div
+                class="{{ 'ribbon ribbon-top' if day.day==_day and day.month == month+1 else 'day-number' }}"
+              >
+                {{ day.day }}
+              </div>
+              {% set events = grouped_events.get(day, []) %} {% set
+              limited_events = events[:3] %} {% set extra_events_count =
+              events|length - 3 %} {% for event in limited_events %}
+              <p>
+                <span class="status status-blue w-100 br-4">
+                  {{ event.title }}
+                </span>
+              </p>
+
+              {% endfor %} {% if extra_events_count > 0 %}
+              <div
+                data-bs-toggle="_popover"
+                title="Popover title  <span style='color:red' onclick='hidePopover(this)'>x</span>"
+                data-trigger="focus"
+                data-bs-html="true"
+                data-bs-content="{% for event in events %}
+                <span class='status status-blue w-100 br-4'>
+                  {{ event.title }}
+                </span>
+                {% endfor %}"
+                href="#"
+                data-bs-placement="bottom"
+                class="hr-text text-primary"
+              >
+                <a>See {{extra_events_count}} more</a>
+              </div>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
+    <script>
+      let popoverTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="_popover"]'),
+      );
+      console.log(popoverTriggerList);
+      popoverTriggerList.map(function (popoverTriggerEl) {
+        let options = {
+          delay: { show: 50, hide: 50 },
+          html:
+            popoverTriggerEl.getAttribute('data-bs-html') === 'true' ?? false,
+          placement:
+            popoverTriggerEl.getAttribute('data-bs-placement') ?? 'auto',
+          sanitize: false,
+        };
+        return new bootstrap.Popover(popoverTriggerEl, options);
+      });
+
+      function hidePopover(e) {
+        const identifier = e.closest('.popover').id;
+
+        bootstrap.Popover.getInstance(
+          document.querySelector(`[aria-describedby="${identifier}"]`),
+        ).hide();
+      }
+    </script>
+  </body>
+</html>
