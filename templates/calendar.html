@@ -77,19 +77,20 @@
             <th class="day-header"><h3>Cumartesi</h3></th>
             <th class="day-header"><h3>Pazar</h3></th>
           </tr>
-
+          {% set grouped_events = events | groupby('date') | group_dictify %} 
+          {% set year, month, day = date.year, date.month, date.day %} 
           {% for chunk in calendar|batch(7, "-") %}
           <tr>
-            {% for day in chunk %}
+            {% for day_ in chunk %}
             <td
-              class="day  {{ 'other-month' if not is_in_year_and_month(day, year, month + 1) else '' }}"
+              class="day  {{ 'other-month' if not day_.year == year and day_.month == month else '' }}"
             >
               <div
-                class="{{ 'ribbon ribbon-top' if day.day==_day and day.month == month+1 else 'day-number' }}"
+                class="{{ 'ribbon ribbon-top' if  day_.date() == now().date() else 'day-number' }}"
               >
-                {{ day.day }}
+                {{ day_.day }}
               </div>
-              {% set events = grouped_events.get(day, []) %} {% set
+              {% set events = grouped_events.get(day_, []) %} {% set
               limited_events = events[:3] %} {% set extra_events_count =
               events|length - 3 %} {% for event in limited_events %}
               <p>

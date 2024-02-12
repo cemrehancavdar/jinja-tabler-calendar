@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from flask import Flask, render_template
-import itertools
+
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 env = Environment(loader=FileSystemLoader("."), autoescape=select_autoescape())
@@ -46,13 +46,14 @@ def generate_calendar(date_input: str | datetime) -> list[datetime]:
     return calendar_dates
 
 
-def is_in_year_and_month(date: datetime, year: int, month: int) -> bool:
-    return date.year == year and date.month == month
 
-
+def group_dictify(group):  
+    return {k: list(v) for k, v in group}
 
 app = Flask(__name__)
 
+app.add_template_filter(group_dictify, 'group_dictify')
+app.add_template_global(datetime.utcnow, 'now')
 
 class Event:
     def __init__(self, date: datetime, title: str, description: str):
@@ -64,11 +65,10 @@ class Event:
 @app.route("/")
 def home():
     year = 2024
-    month = 1
+    month = 2
     day = 2
-
-    calendar = generate_calendar("2024-02-02")
-    chunks = list(itertools.batched(calendar, 7))
+    date = datetime(year, month, day)
+    calendar = generate_calendar(date)
 
     events = [
         Event(datetime(2024, 2, 1), "Item 1", "This is an item"),
@@ -84,19 +84,12 @@ def home():
         Event(datetime(2024, 2, 5), "Item 11", "This is an item"),
     ]
 
-    grouped_events = {
-        k: list(v) for k, v in itertools.groupby(events, key=lambda x: x.date)
-    }
-    print(grouped_events)
+
     return render_template(
         "calendar.html",
-        chunks=chunks,
         calendar=calendar,
-        grouped_events=grouped_events,
-        is_in_year_and_month=is_in_year_and_month,
-        year=year,
-        month=month,
-        _day=day,
+        events=events,
+        date = date
     )
 
 
