@@ -79,11 +79,11 @@
           </tr>
           {% set grouped_events = events | groupby('date') | group_dictify %} 
           {% set year, month, day = date.year, date.month, date.day %} 
-          {% for chunk in calendar|batch(7, "-") %}
+          {% for chunk in generate_calendar(date)|batch(7, "-") %}
           <tr>
             {% for day_ in chunk %}
             <td
-              class="day  {{ 'other-month' if not day_.year == year and day_.month == month else '' }}"
+              class="day  {{ 'other-month' if not day_.month == month else '' }}"
             >
               <div
                 class="{{ 'ribbon ribbon-top' if  day_.date() == now().date() else 'day-number' }}"

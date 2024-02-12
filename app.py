@@ -46,14 +46,16 @@ def generate_calendar(date_input: str | datetime) -> list[datetime]:
     return calendar_dates
 
 
-
-def group_dictify(group):  
+def group_dictify(group):
     return {k: list(v) for k, v in group}
+
 
 app = Flask(__name__)
 
-app.add_template_filter(group_dictify, 'group_dictify')
-app.add_template_global(datetime.utcnow, 'now')
+app.add_template_filter(group_dictify, "group_dictify")
+app.add_template_global(datetime.utcnow, "now")
+app.add_template_global(generate_calendar, "generate_calendar")
+
 
 class Event:
     def __init__(self, date: datetime, title: str, description: str):
@@ -68,10 +70,9 @@ def home():
     month = 2
     day = 2
     date = datetime(year, month, day)
-    calendar = generate_calendar(date)
 
     events = [
-        Event(datetime(2024, 2, 1), "Item 1", "This is an item"),
+        Event(datetime(2024, 2, 1), "Item 1", "This is an item and it is veeeery long"),
         Event(datetime(2024, 2, 1), "Item 2", "This is an item"),
         Event(datetime(2024, 2, 1), "Item 3", "This is an item"),
         Event(datetime(2024, 2, 1), "Item 4", "This is an item"),
@@ -84,13 +85,7 @@ def home():
         Event(datetime(2024, 2, 5), "Item 11", "This is an item"),
     ]
 
-
-    return render_template(
-        "calendar.html",
-        calendar=calendar,
-        events=events,
-        date = date
-    )
+    return render_template("calendar.html", events=events, date=date)
 
 
 if __name__ == "__main__":
